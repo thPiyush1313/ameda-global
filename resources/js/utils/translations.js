@@ -1,0 +1,50 @@
+export const translations = {
+    EN: {
+        nav_home: "Home",
+        nav_about: "About Us",
+        nav_markets: "Markets",
+        nav_products: "Products",
+        nav_insights: "Insights",
+        btn_contact: "Contact Us",
+        search_placeholder: "Search catalog...",
+        select_language: "Select Language",
+        hero_title: "Global Excellence in",
+        hero_subtitle: "Material Sourcing",
+        footer_enterprise: "Enterprise",
+        footer_sectors: "Sectors",
+        footer_contact: "Global Contact",
+        rights: "All rights reserved."
+    },
+    FR: {
+        nav_home: "Accueil",
+        nav_about: "À Propos",
+        nav_markets: "Marchés",
+        nav_products: "Produits",
+        nav_insights: "Actualités",
+        btn_contact: "Contactez-Nous",
+        search_placeholder: "Rechercher...",
+        select_language: "Choisir la langue",
+        hero_title: "Excellence Mondiale en",
+        hero_subtitle: "Approvisionnement",
+        footer_enterprise: "Entreprise",
+        footer_sectors: "Secteurs",
+        footer_contact: "Contact Mondial",
+        rights: "Tous droits réservés."
+    },
+    ZH: {
+        nav_home: "首页",
+        nav_about: "关于我们",
+        nav_markets: "市场",
+        nav_products: "产品",
+        nav_insights: "洞察",
+        btn_contact: "联系我们",
+        search_placeholder: "搜索目录...",
+        select_language: "选择语言",
+        hero_title: "全球卓越",
+        hero_subtitle: "材料采购",
+        footer_enterprise: "企业",
+        footer_sectors: "行业",
+        footer_contact: "全球联系",
+        rights: "版权所有。"
+    }
+};
