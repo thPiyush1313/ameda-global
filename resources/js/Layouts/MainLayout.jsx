@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from '@inertiajs/react';
 import {
     Menu, X, Globe, Search, ChevronDown,
-    Phone, Mail, Bot, Send, Loader2, MessageSquare
+    Phone, Mail, Bot, Send, Loader2, MessageSquare, User, UserPlus,
+    Building2, FlaskConical, ShieldCheck, Cpu, ArrowRight, Layers, Globe2
 } from 'lucide-react';
 import { useLanguage } from '../Contexts/LanguageContext';
 
@@ -15,14 +16,15 @@ export default function MainLayout({ children, forceSolidNav = false }) {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const searchInputRef = useRef(null);
 
-    // PRELOADER STATE
+    // PRELOADER STATE (Balanced timing so text/images load together smoothly)
     const [isLoading, setIsLoading] = useState(true);
-    const [loadingWidth, setLoadingWidth] = useState('w-0');
+
+    // DROPDOWN HOVER STATES
+    const [activeDropdown, setActiveDropdown] = useState(null);
 
     const { currentLang, changeLanguage, t } = useLanguage();
     const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
-    // THIS IS THE CRITICAL VARIABLE:
     const isSolid = forceSolidNav || isScrolled;
 
     const languages = [
@@ -42,7 +44,6 @@ export default function MainLayout({ children, forceSolidNav = false }) {
     const [chatMessages, setChatMessages] = useState([
         { role: 'assistant', text: 'Hello. I am the Ameda Global Trade Assistant. How can I assist you today?' }
     ]);
-    const [isChatLoading, setIsChatLoading] = useState(false);
     const chatEndRef = useRef(null);
 
     const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -50,8 +51,7 @@ export default function MainLayout({ children, forceSolidNav = false }) {
 
     // Preloader, Scroll, & Search Focus
     useEffect(() => {
-        setTimeout(() => setLoadingWidth('w-full'), 100);
-        const timer = setTimeout(() => setIsLoading(false), 2000);
+        const timer = setTimeout(() => setIsLoading(false), 500);
         const handleScroll = () => setIsScrolled(window.scrollY > 50);
 
         if (isSearchOpen && searchInputRef.current && !isSearchFocused) {
@@ -71,26 +71,42 @@ export default function MainLayout({ children, forceSolidNav = false }) {
         const userText = chatInput.trim();
         setChatMessages(prev => [...prev, { role: 'user', text: userText }]);
         setChatInput('');
-        setIsChatLoading(true);
 
         setTimeout(() => {
             setChatMessages(prev => [
                 ...prev,
                 { role: 'assistant', text: `Inquiry received regarding "${userText}". Our specialists will verify specifications and reach out shortly.` }
             ]);
-            setIsChatLoading(false);
         }, 1000);
     };
 
-    const navLinks = [
-        { name: t('nav_home') || 'Home', url: '/' },
-        { name: t('nav_about') || 'About Us', url: '/about' },
-        { name: t('nav_markets') || 'Markets', url: '/markets' },
-        { name: t('nav_products') || 'Products', url: '/products' },
-        { name: t('nav_insights') || 'Insights', url: '/insights' }
+    // Navigation Items
+    const navItems = [
+        {
+            name: 'INDUSTRIES',
+            url: '/industries',
+            dropdown: [
+                { title: 'Pharmaceuticals', desc: 'Active APIs & excipients', url: '/sectors/pharmaceuticals', icon: FlaskConical },
+                { title: 'Biopharmaceuticals', desc: 'Advanced biologic mediums', url: '/sectors/biopharmaceuticals', icon: Cpu },
+                { title: 'Specialty Chemicals', desc: 'High-purity chemical components', url: '/sectors/specialty-chemicals', icon: Layers },
+                { title: 'Nutrition & Wellness', desc: 'Food and sport formulation', url: '/sectors/nutrition', icon: Building2 },
+                { title: 'Industrial Applications', desc: 'Heavy manufacturing inputs', url: '/sectors/industrial', icon: ShieldCheck }
+            ]
+        },
+        {
+            name: 'SOLUTIONS',
+            url: '/solutions',
+            dropdown: [
+                { title: 'Custom Sourcing', desc: 'Global vendor discovery & auditing', url: '/solutions/sourcing', icon: Globe2 },
+                { title: 'Precision Manufacturing', desc: 'Contract processing & blending', url: '/solutions/manufacturing', icon: Layers },
+                { title: 'Supply Chain Architecture', desc: 'Secure logistics & warehousing', url: '/solutions/supply-chain', icon: ShieldCheck }
+            ]
+        },
+        { name: 'All Products', url: '/products' },
+        { name: 'INSIGHTS', url: '/insights' },
+        { name: 'ABOUT US', url: '/about' }
     ];
 
-    // UPDATED BRAND LOGO
     const BrandLogo = ({ isFooter = false }) => (
         <Link href="/" className="flex items-center gap-3 cursor-pointer group">
             <div className="relative flex items-center justify-center w-12 h-12 transform group-hover:scale-105 transition-all duration-500">
@@ -109,7 +125,7 @@ export default function MainLayout({ children, forceSolidNav = false }) {
                     <path d="M3.34 17 C 8 14 16 14 20.66 17" stroke="url(#globe-gradient)" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
             </div>
-            <div className={`flex flex-col justify-center transition-colors duration-500`}>
+            <div className="flex flex-col justify-center">
                 <span className={`text-2xl font-black tracking-[0.15em] leading-none uppercase ${isFooter ? 'text-white' : (isSolid ? 'text-blue-700' : 'text-white drop-shadow-md')}`}>
                     Ameda
                 </span>
@@ -123,61 +139,99 @@ export default function MainLayout({ children, forceSolidNav = false }) {
     return (
         <div className="min-h-screen bg-white font-sans text-gray-900 w-full overflow-x-hidden selection:bg-blue-600 selection:text-white">
 
-            {/* PRELOADER OVERLAY */}
-            <div className={`fixed inset-0 z-[100] bg-gray-950 flex flex-col items-center justify-center transition-all duration-1000 ease-in-out ${isLoading ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                <div className="flex flex-col items-center transform transition-transform duration-1000">
-                    <div className="animate-pulse mb-10">
-                        <BrandLogo isFooter={true} />
-                    </div>
-                    <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden mb-4">
-                        <div className={`h-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all ease-out duration-[2000ms] ${loadingWidth}`}></div>
-                    </div>
-                    <div className="text-emerald-400/80 text-[0.65rem] font-bold tracking-[0.3em] uppercase animate-pulse flex items-center gap-2">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Initializing Global Network...
+            {/* PRELOADER */}
+            <div className={`fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-500 ease-in-out ${isLoading ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+                <div className="flex flex-col items-center">
+                    <div className="mb-4"><BrandLogo isFooter={true} /></div>
+                    <div className="text-emerald-400 text-xs font-bold tracking-[0.3em] uppercase flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Loading...
                     </div>
                 </div>
             </div>
 
             {/* HEADER */}
             <header className={`fixed w-full top-0 z-50 transition-all duration-500 ${isSolid ? 'bg-white/95 backdrop-blur-md py-3 shadow-md border-b border-gray-200' : 'bg-transparent py-6'}`}>
-                <div className="container mx-auto px-6 flex justify-between items-center">
+                <div className="container mx-auto px-6 flex justify-between items-center relative">
                     <BrandLogo />
 
+                    {/* DESKTOP NAVIGATION */}
                     <nav className="hidden lg:flex items-center gap-8">
-                        {navLinks.map((link) => (
-                            <Link key={link.name} href={link.url} className={`text-sm font-bold tracking-wide transition-colors uppercase ${isSolid ? 'text-gray-900 hover:text-blue-700' : 'text-white hover:text-gray-200 drop-shadow-sm'}`}>
-                                {link.name}
-                            </Link>
+                        {navItems.map((item, idx) => (
+                            <div
+                                key={item.name}
+                                className="relative py-2"
+                                onMouseEnter={() => setActiveDropdown(idx)}
+                                onMouseLeave={() => setActiveDropdown(null)}
+                            >
+                                <Link
+                                    href={item.url}
+                                    className={`flex items-center gap-1 text-sm font-bold tracking-wide uppercase transition-colors ${isSolid ? 'text-gray-900 hover:text-blue-700' : 'text-white hover:text-gray-200 drop-shadow-sm'}`}
+                                >
+                                    {item.name}
+                                    {item.dropdown && <ChevronDown className="w-3 h-3 opacity-70" />}
+                                </Link>
+
+                                {/* HOVER DROPDOWN PANEL */}
+                                {item.dropdown && activeDropdown === idx && (
+                                    <div className="absolute top-full left-0 mt-1 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden py-3 z-50 animate-fadeIn">
+                                        <div className="px-4 py-2 border-b border-gray-50 text-[10px] font-extrabold tracking-widest text-blue-600 uppercase">
+                                            {item.name} Directory
+                                        </div>
+                                        <div className="flex flex-col">
+                                            {item.dropdown.map((sub, sIdx) => {
+                                                const IconComponent = sub.icon;
+                                                return (
+                                                    <Link
+                                                        key={sIdx}
+                                                        href={sub.url}
+                                                        className="px-4 py-3 hover:bg-blue-50/70 transition-all flex items-start gap-3 group"
+                                                    >
+                                                        <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                                            <IconComponent className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-sm font-bold text-gray-900 uppercase tracking-wide group-hover:text-blue-700 transition-colors flex items-center justify-between">
+                                                                {sub.title}
+                                                                <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transform -translate-x-1 group-hover:translate-x-0 transition-all text-blue-600" />
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 font-normal leading-tight mt-0.5">{sub.desc}</div>
+                                                        </div>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </nav>
 
-                    <div className="hidden lg:flex items-center gap-6">
-
-                        {/* EXPANDING SEARCH BAR */}
+                    {/* RIGHT ACTIONS */}
+                    <div className="hidden lg:flex items-center gap-4">
+                        {/* SEARCH */}
                         <div className="relative flex items-center" onMouseEnter={() => setIsSearchOpen(true)} onMouseLeave={() => { if (!isSearchFocused && !searchInputRef.current?.value) { setIsSearchOpen(false); } }}>
-                            <div className={`overflow-hidden transition-all duration-300 ease-out flex items-center ${isSearchOpen ? 'w-48 opacity-100 mr-3' : 'w-0 opacity-0 mr-0'}`}>
+                            <div className={`overflow-hidden transition-all duration-300 ease-out flex items-center ${isSearchOpen ? 'w-48 opacity-100 mr-2' : 'w-0 opacity-0 mr-0'}`}>
                                 <input
                                     ref={searchInputRef}
                                     type="text"
-                                    placeholder={t('search_placeholder') || "Search catalog..."}
-                                    className={`w-full rounded-full py-1.5 px-4 text-sm focus:outline-none focus:ring-2 transition-all ${isSolid
-                                        ? 'bg-gray-100 border border-transparent text-gray-900 placeholder-gray-500 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20'
-                                        : 'bg-white/10 border border-white/20 text-white placeholder-white/60 focus:bg-white/20 focus:border-white/50 focus:ring-white/20 backdrop-blur-md'
-                                        }`}
+                                    placeholder="Search catalog..."
+                                    className={`w-full rounded-full py-1.5 px-4 text-sm focus:outline-none focus:ring-2 transition-all ${isSolid ? 'bg-gray-100 text-gray-900 placeholder-gray-500 focus:bg-white focus:ring-blue-500/20' : 'bg-white/10 text-white placeholder-white/60 focus:bg-white/20'}`}
                                     onFocus={() => setIsSearchFocused(true)}
                                     onBlur={(e) => { setIsSearchFocused(false); if (!e.target.value) setIsSearchOpen(false); }}
                                 />
                             </div>
-                            <button onClick={() => { if (isSearchOpen) { if (searchInputRef.current) searchInputRef.current.value = ''; setIsSearchOpen(false); } else { setIsSearchOpen(true); } }}
-                                className={`${isSolid ? 'text-gray-900 hover:text-blue-700' : 'text-white hover:text-gray-200'} transition-colors flex items-center justify-center`}
+                            <button
+                                onClick={() => { if (isSearchOpen) { if (searchInputRef.current) searchInputRef.current.value = ''; setIsSearchOpen(false); } else { setIsSearchOpen(true); } }}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm ${isSolid ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-md'}`}
+                                title="Search catalog"
                             >
-                                {isSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+                                {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
                             </button>
                         </div>
 
                         {/* LANGUAGE DROPDOWN */}
                         <div className="relative">
-                            <button onClick={() => setLangDropdownOpen(!langDropdownOpen)} className={`flex items-center gap-1.5 text-sm font-bold tracking-wide transition-colors uppercase ${isSolid ? 'text-gray-900 hover:text-blue-700' : 'text-white hover:text-gray-200'}`}>
+                            <button onClick={() => setLangDropdownOpen(!langDropdownOpen)} className={`flex items-center gap-1.5 text-sm font-bold tracking-wide transition-colors uppercase px-2.5 py-1.5 rounded-lg ${isSolid ? 'text-gray-900 hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}>
                                 <Globe className="w-4 h-4" /> {currentLang} <ChevronDown className="w-3 h-3" />
                             </button>
                             {langDropdownOpen && (
@@ -192,8 +246,18 @@ export default function MainLayout({ children, forceSolidNav = false }) {
                             )}
                         </div>
 
-                        <Link href="/contact" className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-colors shadow-lg shadow-blue-600/30">
-                            {t('btn_contact') || 'Contact Us'}
+                        {/* BEAUTIFIED LOGIN ICON BUTTON */}
+                        <Link
+                            href="/login"
+                            title="Login"
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm ${isSolid ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-blue-600' : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-md'}`}
+                        >
+                            <User className="w-4 h-4" />
+                        </Link>
+
+                        {/* EYE-CATCHY "GET SAMPLE OR QUOTE" BUTTON */}
+                        <Link href="/contact" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full text-xs font-black tracking-widest uppercase transition-all shadow-lg shadow-blue-600/30 transform hover:-translate-y-0.5">
+                            GET SAMPLE OR QUOTE
                         </Link>
                     </div>
 
@@ -203,19 +267,35 @@ export default function MainLayout({ children, forceSolidNav = false }) {
                 </div>
 
                 {mobileMenuOpen && (
-                    <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-2xl border-t border-gray-100">
+                    <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-2xl border-t border-gray-100 max-h-[80vh] overflow-y-auto">
                         <div className="flex flex-col px-6 py-6 space-y-4">
-                            {navLinks.map((link) => (
-                                <Link key={link.name} href={link.url} className="text-gray-900 hover:text-blue-600 font-bold text-lg py-3 border-b border-gray-100 uppercase tracking-wide" onClick={() => setMobileMenuOpen(false)}>
-                                    {link.name}
-                                </Link>
+                            {navItems.map((item) => (
+                                <div key={item.name} className="border-b border-gray-100 pb-3">
+                                    <Link href={item.url} className="text-gray-900 hover:text-blue-600 font-bold text-lg py-3 uppercase tracking-wide block" onClick={() => setMobileMenuOpen(false)}>
+                                        {item.name}
+                                    </Link>
+                                    {item.dropdown && (
+                                        <div className="pl-4 mt-2 space-y-2">
+                                            {item.dropdown.map((sub, sIdx) => (
+                                                <Link key={sIdx} href={sub.url} className="text-xs text-gray-600 hover:text-blue-600 block py-1 font-semibold" onClick={() => setMobileMenuOpen(false)}>
+                                                    • {sub.title}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ))}
+                            <div className="grid grid-cols-2 gap-3 pt-2">
+                                <Link href="/login" className="text-center bg-gray-100 text-gray-800 py-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-2"><User className="w-4 h-4" /> Login</Link>
+                                <Link href="/register" className="text-center bg-emerald-500 text-white py-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-2"><UserPlus className="w-4 h-4" /> Register</Link>
+                            </div>
+                            <Link href="/contact" className="text-center bg-blue-600 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-md">GET SAMPLE OR QUOTE</Link>
                         </div>
                     </div>
                 )}
             </header>
 
-            {/* DYNAMIC PAGE CONTENT GOES HERE */}
+            {/* MAIN CONTENT */}
             <main>
                 {children}
             </main>
@@ -262,27 +342,23 @@ export default function MainLayout({ children, forceSolidNav = false }) {
                 </div>
             </footer>
 
-            {/* FLOATING CHAT WIDGET */}
+            {/* CHAT WIDGET */}
             <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end font-sans">
                 {isChatOpen && (
-                    <div className="mb-4 w-[350px] sm:w-[380px] h-[520px] bg-white shadow-2xl overflow-hidden flex flex-col rounded-2xl border border-gray-200 origin-bottom-right transition-all">
-                        <div className="bg-gradient-to-r from-blue-700 to-emerald-500 p-4 flex justify-between items-center text-white">
+                    <div className="mb-4 w-[350px] sm:w-[380px] h-[520px] bg-white shadow-2xl overflow-hidden flex flex-col rounded-2xl border border-gray-200">
+                        <div className="bg-gradient-to-r from-blue-600 to-emerald-500 p-4 flex justify-between items-center text-white">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                                     <Bot className="w-5 h-5 text-white" />
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-sm tracking-wide uppercase">Trade Assistant</h3>
-                                </div>
+                                <h3 className="font-bold text-sm tracking-wide uppercase">Trade Assistant</h3>
                             </div>
-                            <button onClick={() => setIsChatOpen(false)} className="text-white/70 hover:text-white transition-colors">
-                                <X className="w-5 h-5" />
-                            </button>
+                            <button onClick={() => setIsChatOpen(false)} className="text-white/70 hover:text-white"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-5 bg-gray-50/50 space-y-5">
                             {chatMessages.map((msg, idx) => (
                                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] p-3.5 text-sm shadow-sm leading-relaxed ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white border border-gray-100 text-gray-800 rounded-r-2xl rounded-tl-2xl'}`}>
+                                    <div className={`max-w-[85%] p-3.5 text-sm shadow-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white border border-gray-100 text-gray-800 rounded-r-2xl rounded-tl-2xl'}`}>
                                         {msg.text}
                                     </div>
                                 </div>

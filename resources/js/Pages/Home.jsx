@@ -6,7 +6,7 @@ import Seo from '../Components/Seo';
 import {
     ArrowRight, ShieldCheck, Zap, Leaf,
     Factory, TestTube, Cpu, Building2, Package,
-    Box, ArrowUpRight, Globe, Layers, Loader2
+    Box, ArrowUpRight, Globe, Layers, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 export default function Home() {
@@ -14,6 +14,7 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(true);
     const [loadingWidth, setLoadingWidth] = useState('w-0');
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [spotlightIndex, setSpotlightIndex] = useState(2); // Center card active by default
     const { t } = useLanguage();
 
     const heroImages = [
@@ -21,6 +22,13 @@ export default function Home() {
         '/images/hero-2.jpg',
         '/images/hero-3.jpg',
         '/images/hero-4.jpg'
+    ];
+    const spotlights = [
+        { title: 'Global Strategic Sourcing', img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800', url: '/solutions/sourcing' },
+        { title: 'Contract Processing & Blending', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800', url: '/solutions/processing' },
+        { title: 'Manufacturing Services', img: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=800', url: '/solutions/manufacturing' },
+        { title: 'Analytical Quality Testing', img: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=800', url: '/solutions/testing' },
+        { title: 'Secure Supply Chain Logistics', img: 'https://images.unsplash.com/photo-1616423640778-28d1b53229bd?q=80&w=800', url: '/solutions/logistics' }
     ];
 
     useEffect(() => {
@@ -34,6 +42,15 @@ export default function Home() {
             clearInterval(slideTimer);
         };
     }, [heroImages.length]);
+
+    const nextSpotlight = () => {
+        setSpotlightIndex((prev) => (prev + 1) % spotlights.length);
+    };
+
+    const prevSpotlight = () => {
+        setSpotlightIndex((prev) => (prev - 1 + spotlights.length) % spotlights.length);
+    };
+
     // Define AmedaLogo here so the Preloader can use it
     const AmedaLogo = ({ isFooter = false }) => (
         <div className="flex items-center gap-3 cursor-pointer group">
@@ -87,7 +104,7 @@ export default function Home() {
 
                 <div className="container mx-auto px-6 relative z-30">
                     <div className="max-w-3xl">
-                        <div className={`transition-all duration-1000 delay-200 transform ${!isLoading && mounted ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+                        <div className="translate-y-0 opacity-100">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white mb-6">
                                 <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
                                 <span className="text-xs font-bold tracking-widest uppercase">Global Network Active</span>
@@ -265,6 +282,92 @@ export default function Home() {
                                     </div>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* SOLUTION AND SERVICE SPOTLIGHTS SLIDER (TRUE CENTER HIGHLIGHTING) */}
+            <section className="py-28 bg-[#1e3a8a] text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-700 via-blue-900 to-gray-950 opacity-80"></div>
+
+                <div className="container mx-auto px-6 relative z-10 max-w-7xl">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
+                            Solution and Service Spotlights
+                        </h2>
+                        <div className="w-24 h-1 bg-sky-400 mx-auto rounded-full"></div>
+                    </div>
+
+                    {/* Coverflow Carousel Layout */}
+                    <div className="relative flex items-center justify-center py-6 min-h-[480px]">
+                        <button
+                            onClick={prevSpotlight}
+                            className="absolute left-2 md:left-8 z-40 w-12 h-12 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 flex items-center justify-center text-white backdrop-blur-md transition-all duration-300 shadow-xl"
+                            aria-label="Previous Slide"
+                        >
+                            <ChevronLeft className="w-6 h-6" />
+                        </button>
+
+                        <div className="flex items-center justify-center gap-3 md:gap-5 w-full overflow-visible py-8 px-4">
+                            {spotlights.map((item, idx) => {
+                                // Calculate distance relative to spotlightIndex mapped in exact display order [-2, -1, 0, 1, 2]
+                                const total = spotlights.length;
+                                let offset = idx - spotlightIndex;
+                                if (offset < -2) offset += total;
+                                if (offset > 2) offset -= total;
+
+                                const isCenter = offset === 0;
+
+                                let cardStyle = "transition-all duration-700 ease-out cursor-pointer relative rounded-[2rem] overflow-hidden shadow-2xl flex-shrink-0 ";
+
+                                if (isCenter) {
+                                    cardStyle += "w-[280px] md:w-[380px] h-[460px] z-30 scale-100 opacity-100 border-2 border-white/80 shadow-[0_25px_60px_rgba(0,0,0,0.6)] brightness-110 pointer-events-auto";
+                                } else if (Math.abs(offset) === 1) {
+                                    cardStyle += "w-[200px] md:w-[260px] h-[380px] z-20 opacity-60 scale-90 blur-[0.5px] brightness-75 pointer-events-auto";
+                                } else {
+                                    cardStyle += "w-[150px] md:w-[200px] h-[320px] z-10 opacity-30 scale-80 blur-[1px] brightness-50 hidden sm:block pointer-events-auto";
+                                }
+
+                                return (
+                                    <div
+                                        key={idx}
+                                        onClick={() => setSpotlightIndex(idx)}
+                                        className={cardStyle}
+                                    >
+                                        <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-950/30 to-transparent"></div>
+                                        <div className="absolute inset-0 p-6 flex flex-col justify-end text-center">
+                                            <h3 className={`font-bold text-white tracking-wide transition-all duration-500 ${isCenter ? 'text-xl md:text-2xl mb-2 font-black' : 'text-sm md:text-base opacity-70'}`}>
+                                                {item.title}
+                                            </h3>
+                                            {isCenter && (
+                                                <Link href={item.url} className="inline-flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-sky-300 mt-2 hover:text-white transition-colors">
+                                                    Explore Service <ArrowRight className="w-3.5 h-3.5" />
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            onClick={nextSpotlight}
+                            className="absolute right-2 md:right-8 z-40 w-12 h-12 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 flex items-center justify-center text-white backdrop-blur-md transition-all duration-300 shadow-xl"
+                            aria-label="Next Slide"
+                        >
+                            <ChevronRight className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    <div className="flex justify-center gap-2 mt-8">
+                        {spotlights.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setSpotlightIndex(idx)}
+                                className={`h-2 rounded-full transition-all duration-300 ${idx === spotlightIndex ? 'w-8 bg-sky-400' : 'w-2 bg-white/30 hover:bg-white/50'}`}
+                            />
                         ))}
                     </div>
                 </div>
@@ -464,11 +567,9 @@ export default function Home() {
                         ))}
                     </div>
 
-                    {/* Premium Testimonials Grid */}
-
-
                 </div>
             </section>
+
             {/* PREMIUM ENTERPRISE STATS SECTION */}
             <section className="py-24 relative overflow-hidden bg-gray-950 border-y border-gray-900">
 
@@ -610,9 +711,6 @@ export default function Home() {
 
                 </div>
             </section>
-
-            {/* REST OF SECTIONS (Products, Stats, Global Network, Insights) Remain Identical, but rendered via MainLayout */}
-            {/* ... (Include your complete existing Home sections here) ... */}
         </MainLayout>
     );
 }
